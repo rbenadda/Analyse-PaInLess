@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 Painless: a Framework for Parallel SAT Solving 
 ==============================================
 
@@ -40,3 +41,7 @@ To run the solvers
 
 * painless-mcomsps-strength:
    ./painless-mcomsps -strength dimacs\_filename
+=======
+# Analyse-PaInLess
+Script permettant la création et l'analyse des doublons dans le framework PaInLess
+>>>>>>> 038427c7a69ab72fdd78d9aaeec3bf0b9daa2da0
