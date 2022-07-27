@@ -10,7 +10,7 @@ int index_clause = 0;
 
 ClauseHashTable::ClauseHashTable() {
     ///data/rbenadda/painless-sat-competition-2022/painless/dimacs_logs_after
-    string path = "/data/rbenadda/painless-sat-competition-2022/painless/logs/dimacs_logs/";
+    string path = "/data/rbenadda/painless-sat-competition-2022/painless/logs/";
     logPath = Parameters::getParam("log",path);
     string name(Parameters::getFilename());
     name = name.substr(name.find_last_of("/") + 1);
