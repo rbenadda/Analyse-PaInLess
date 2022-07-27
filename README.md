@@ -1,47 +1,43 @@
-<<<<<<< HEAD
 Painless: a Framework for Parallel SAT Solving 
 ==============================================
 
-* Ludovic LE FRIOUX (ludovic@lefrioux.fr)
-* Vincent VALLADE (vincent.vallade@lip6.fr) 
 
 
-Content
+
+Contenu
 -------
-* painless-src/:
-   Contains the code of the framework.
+* painless-src/:  
+   Contient le code du framework.
    * clauses/:
-      Contains the code to manage shared clauses.
+      Contient le code pour diriger les clauses partagées.
    * working/:
-      Code links to the worker organization.
+      Contient le code pour organiser et lier les workers.
    * sharing/:
-      Code links to the learnt clause sharing management.
+      Contient le code utilitaire pour traiter les clauses dans le sharer.
    * solvers/:
-      Contains wrapper for the sequential solvers.
+      Contient le wrapper de solvers séquentiels.
    * utils/:
-      Contains code for clauses management. But also useful data structures.
+      Contient le code pour organiser les clauses et d'autres structures utiles.
 
 * mapleCOMSPS/:
-   Contains the code of MapleCOMSPS from the SAT Competition 17 with some little changes.
+   Contient le code de MapleCOMSPS de la Competition SAT 17 avec quelques changements mineurs.
 
-
-To compile the project
+* utils/:
+   Contient des scripts utilitaires pour la manipulation de fichiers CNF.
+Pour Compiler le projet
 ----------------------
 
-* In the painless-mcomsps home directory use 'make' to compile the code.
+* A la racine du projet, utiliser la commande 'make' pour compiler.
 
-* In the painless-mcomsps home directory use 'make clean' to clean.
+* A la racine du projet, utiliser la commande 'make clean' pour nettoyer proprement.
 
 
-To run the solvers
+Pour démarrer PaInLeSS
 ------------------
 
-* painless-mcomsps:
-   ./painless-mcomsps dimacs\_filename
+* painless:
+   ./run-data dimacs\_filename workers\_number timeout out.txt
 
-* painless-mcomsps-strength:
-   ./painless-mcomsps -strength dimacs\_filename
 =======
-# Analyse-PaInLess
-Script permettant la création et l'analyse des doublons dans le framework PaInLess
->>>>>>> 038427c7a69ab72fdd78d9aaeec3bf0b9daa2da0
+
+

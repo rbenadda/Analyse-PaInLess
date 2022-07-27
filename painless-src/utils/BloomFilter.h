@@ -7,7 +7,7 @@
 #include <cmath>
 #include <iostream>
 #include <algorithm>
-#include "utils/hashfunc.h"
+#include "hashfunc.h"
 // #include <spot/misc/clz.hh>
 
 using namespace std;

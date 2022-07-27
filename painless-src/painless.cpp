@@ -27,7 +27,6 @@
 #include "clauses/ClauseManager.h"
 
 #include "sharing/HordeSatSharing.h"
-#include "sharing/StrengtheningSharing.h"
 #include "sharing/Sharer.h"
 
 #include "working/SequentialWorker.h"
@@ -93,14 +92,9 @@ int main(int argc, char ** argv)
    vector<SolverInterface *> solvers_VSIDS;
    vector<SolverInterface *> solvers_LRB;
 
-   if(solverName.compare("k")==0)
-   {
-      SolverFactory::createKissatSolvers(cpus , solvers);
-   }
-   else{
-      SolverFactory::createMapleCOMSPSSolvers(cpus, solvers);
-      solvers.push_back(SolverFactory::createReducerSolver(SolverFactory::createMapleCOMSPSSolver()));
-        }
+
+   SolverFactory::createMapleCOMSPSSolvers(cpus, solvers);
+   solvers.push_back(SolverFactory::createReducerSolver(SolverFactory::createMapleCOMSPSSolver()));
 
    int nSolvers = solvers.size();
 
@@ -133,41 +127,6 @@ int main(int argc, char ** argv)
       nSharers = 1;
       sharers  = new Sharer*[nSharers];
       sharers[0] = new Sharer(1, new HordeSatSharing(), solvers,solvers);
-      break;
-   case 2:
-      prod1.insert(prod1.end(), solvers.begin(), solvers.begin() + (cpus/2 - 1));
-      prod2.insert(prod2.end(), solvers.begin() + (cpus/2 - 1), solvers.end() - 2);
-      reducer1.push_back(solvers[solvers.size() - 2]);
-      reducer2.push_back(solvers[solvers.size() - 1]);
-
-      cons1.insert(cons1.end(), prod1.begin(), prod1.end());
-      cons1.push_back(solvers[solvers.size() - 2]);
-      cons2.insert(cons2.end(), prod2.begin(), prod2.end());
-      cons2.push_back(solvers[solvers.size() - 1]);
-      consCDCL.insert(consCDCL.end(), prod1.begin(), prod1.end());
-      consCDCL.insert(consCDCL.end(), prod2.begin(), prod2.end());
-
-      nSharers = 4;
-      sharers  = new Sharer*[nSharers];
-      sharers[0] = new Sharer(1, new HordeSatSharing(), prod1, cons1);
-      sharers[1] = new Sharer(2, new HordeSatSharing(), prod2, cons2);
-      sharers[2] = new Sharer(3, new HordeSatSharing(), reducer1, consCDCL);
-      sharers[3] = new Sharer(4, new HordeSatSharing(), reducer2, consCDCL);
-      break;
-   case 3:
-      prod1.insert(prod1.end(), solvers.begin(), solvers.begin() + cpus/2);
-      prod1.push_back(solvers[solvers.size() - 2]);
-      prod2.insert(prod2.end(), solvers.begin() + cpus/2, solvers.end() - 2);
-      prod2.push_back(solvers[solvers.size() - 1]);
-
-      cons1.insert(cons1.end(), solvers.begin(), solvers.end() - 1);
-      cons2.insert(cons2.end(), solvers.begin(), solvers.end() - 2);
-      cons2.push_back(solvers[solvers.size() - 1]);
-
-      nSharers = 2;
-      sharers  = new Sharer*[nSharers];
-      /*sharers[0] = new Sharer(1, new StrengtheningSharing(), prod1, cons1);
-      sharers[1] = new Sharer(2, new StrengtheningSharing(), prod2, cons2);*/
       break;
    default:
       break;

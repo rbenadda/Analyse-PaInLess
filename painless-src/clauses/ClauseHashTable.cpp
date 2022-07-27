@@ -1,8 +1,8 @@
-#include "clauses/ClauseHashTable.h"
+#include "../clauses/ClauseHashTable.h"
 #include <algorithm>
 #include <stdio.h>
-#include "utils/System.h"
-#include "utils/Parameters.h"
+#include "../utils/System.h"
+#include "../utils/Parameters.h"
 
 using namespace std;
 

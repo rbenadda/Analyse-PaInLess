@@ -2,7 +2,7 @@
 #include <map>
 #include <unordered_map>
 #include <vector>
-#include "clauses/ClauseExchange.h"
+#include "ClauseExchange.h"
 
 using namespace std;
 

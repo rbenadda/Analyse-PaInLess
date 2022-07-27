@@ -1,4 +1,4 @@
-#include <utils/BloomFilter.h>
+#include "BloomFilter.h"
 
 /* Lock-free concurrent Bloom Filter implementation */
 

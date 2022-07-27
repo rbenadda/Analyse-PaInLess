@@ -18,8 +18,6 @@
 // -----------------------------------------------------------------------------
 
 #include "../solvers/MapleCOMSPSSolver.h"
-#include "../solvers/MapleChronoBTSolver.h"
-#include "../solvers/Kissat.h"
 #include "../solvers/SolverFactory.h"
 #include "../solvers/Reducer.h"
 #include "../utils/Parameters.h"
@@ -66,18 +64,6 @@ SolverFactory::createMapleCOMSPSSolver()
 }
 
 SolverInterface *
-SolverFactory::createMapleChronoBTSolver()
-{
-   int id = currentIdSolver.fetch_add(1);
-
-   SolverInterface * solver = new MapleChronoBTSolver(id);
-
-   solver->loadFormula(Parameters::getFilename());
-
-   return solver;
-}
-
-SolverInterface *
 SolverFactory::createReducerSolver(SolverInterface* _solver)
 {
    int id = currentIdSolver.fetch_add(1);
@@ -104,38 +90,6 @@ SolverFactory::createMapleCOMSPSSolvers(int maxSolvers,
    for (int i = 1; i < maxSolvers; i++) {
       solvers.push_back(cloneSolver(solvers[0]));
    }
-}
-
-void
-SolverFactory::createMapleChronoBTSolvers(int nbSolvers,
-                           vector<SolverInterface *> & solvers)
-{
-   for (size_t i = 0; i < nbSolvers; i++) {
-      MapleChronoBTSolver* maple = (MapleChronoBTSolver*) createMapleChronoBTSolver();
-      solvers.push_back(maple);
-   }
-}
-
-void
-SolverFactory::createKissatSolvers(int nbSolvers,
-                                   vector<SolverInterface *> & solvers)
-{
-   for (size_t i = 0; i < nbSolvers; i++)
-   {
-      Kissat * kissat = (Kissat*) createKissatSolver();
-      solvers.push_back(kissat);
-   }
-}
-
-SolverInterface *
-SolverFactory::createKissatSolver()
-{
-   int id = currentIdSolver.fetch_add(1);
-
-   SolverInterface *solver = new Kissat(id);
-
-   solver->loadFormula(Parameters::getFilename());
-   return solver;
 }
 
 SolverInterface *

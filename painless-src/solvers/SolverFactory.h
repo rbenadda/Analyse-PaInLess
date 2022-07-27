@@ -34,21 +34,10 @@ public:
    /// Instantiate and return a MapleCOMSPS solver.
    static SolverInterface * createMapleCOMSPSSolver();
 
-   static SolverInterface * createMapleChronoBTSolver();
-
-   /// Instantiate and return a Kissat-MAB solver.
-   static SolverInterface * createKissatSolver();
 
    /// Instantiate and return a group of MapleCOMSPS solvers.
    static void createMapleCOMSPSSolvers(int groupSize,
                                         vector<SolverInterface *> & solvers);
-
-   static void createMapleChronoBTSolvers(int groupSize,
-                                        vector<SolverInterface *> & solvers);
-
-   /// Instantiate and return a group of Kissat-MAB solvers.
-   static void createKissatSolvers(int groupSize,
-                                   vector<SolverInterface *> & solvers);
 
    static SolverInterface * createReducerSolver(SolverInterface *solver);
 
