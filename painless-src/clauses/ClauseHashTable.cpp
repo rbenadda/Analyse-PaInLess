@@ -10,7 +10,7 @@ int index_clause = 0;
 
 ClauseHashTable::ClauseHashTable() {
     ///data/rbenadda/painless-sat-competition-2022/painless/dimacs_logs_after
-    string path = "/data/rbenadda/painless-sat-competition-2022/painless/logs/";
+    string path = "/data/rbenadda/painless-sat-competition-2022/painless/logs";
     logPath = Parameters::getParam("log",path);
     string name(Parameters::getFilename());
     name = name.substr(name.find_last_of("/") + 1);
@@ -30,7 +30,7 @@ int ClauseHashTable::store(ClauseExchange* c, int round) {
    }
     // If the clause come from a regular solver (not the Reducer),
     // increase the ref counter in 'clauses'
-//!    if (c->from < reducer_id) {
+    if (c->from < reducer_id) {
         auto it_solver = clauses[cls].workers.find(c->from);
             // Ajout du lbd de la clause
         clauses[cls].lbds[c->from].push_back(c->lbd);
@@ -58,7 +58,7 @@ int ClauseHashTable::store(ClauseExchange* c, int round) {
             }
     }
     // Else, increases the ref counter in reduction
-    /*} else */if (c->from == reducer_id) {
+    } else if (c->from == reducer_id) {
         auto it_cls = reductions.find(cls);
         if (it_cls != reductions.end()) {
             reductions[cls]++;
@@ -79,7 +79,7 @@ void ClauseHashTable::store_time(ClauseExchange* c,unsigned int round){
     for (int lit : tmp) {
        cls += std::to_string(lit);
     }
-    //! if (c->from < reducer_id) {
+    if (c->from < reducer_id) {
        auto it_solver = clauses_time[cls].workers.find(c->from);
        if (it_solver != clauses_time[cls].workers.end()) {
        		clauses_time[cls].workers[c->from]++;
@@ -97,7 +97,7 @@ void ClauseHashTable::store_time(ClauseExchange* c,unsigned int round){
             clauses_lbd[cls].size = (c->size);
             index_clause++;
         }
-    //!}
+    }
 }
 
 void ClauseHashTable::print_duplicate_time(unsigned int round,string end_file){
@@ -180,20 +180,6 @@ void ClauseHashTable::print_duplicate_time(unsigned int round,string end_file){
                 nb_lbd++;       
             }
         }
-
-        // for(auto& it_wkr : it_cls.second.lbds_per_round){ // Pour chacun des workers
-        //         first = true;
-        //         for (auto it_vec = it_wkr.second[round].begin();it_vec != it_wkr.second[round].end();it_vec++){
-        //             if (first == true){
-        //                 fprintf(file,"lbdgot,%ld,%ld,%ld,%d,%d",round,it_cls.second.index,nb_lbd,it_cls.second.size,it_wkr.first);
-        //                 first = false;
-        //             }
-        //             fprintf(file,",%d",*it_vec);                  
-        //         }
-        //             if( first != true){
-        //                 fprintf(file,"\n");
-        //             }
-        // }
 
         if(nb_lbd > 1){
             for(auto& it_wkr : it_cls.second.lbds_per_round){ // Pour chacun des workers
@@ -332,12 +318,8 @@ void ClauseHashTable::print_duplicate(string end_file) {
 				}
 			}
 
-			if(pair > 1){
-				nb_pair++;
-			}
-			if(impair > 1){
-				nb_impair++;
-			}
+			if(pair > 1){nb_pair++;}
+			if(impair > 1){nb_impair++;}
 		}
 	}
 
@@ -362,40 +344,38 @@ void ClauseHashTable::print_duplicate(string end_file) {
         //size_doublons
         if(it_cls.second.lbds.size() > 1 ){
             // clause doublons | respectivement id_worker, size et les lbds
-            fprintf(file,"cd,%ld,%d",nb_clause,it_cls.second.size);
+            //* fprintf(file,"cd,%ld,%d",nb_clause,it_cls.second.size);
             for (auto it_lbd = it_cls.second.lbds.begin(); it_lbd != it_cls.second.lbds.end(); it_lbd++){
                 for (auto it_vec = it_lbd->second.begin();it_vec != it_lbd->second.end();it_vec++){
-                    fprintf(file,";%d,%ld",it_lbd->first,*it_vec); // worker/lbd     
+                    fprintf(file,"cd,%ld,%d,%d,%ld,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL\n",nb_clause,it_cls.second.size,it_lbd->first,*it_vec); // worker/lbd     
                 }
             }
-            fprintf(file,"\n");
             nb_clause++;
         }
     // Pour toutes les clauses 
-        fprintf(file,"cg,%ld,%d",nb_clause,it_cls.second.size); // clauses globales
+        //* fprintf(file,"cg,%ld,%d",nb_clause,it_cls.second.size); // clauses globales
         for (auto it_lbd = it_cls.second.lbds.begin(); it_lbd != it_cls.second.lbds.end(); it_lbd++){
                 for (auto it_vec = it_lbd->second.begin();it_vec != it_lbd->second.end();it_vec++){
-                    fprintf(file,";%d,%ld",it_lbd->first,*it_vec); //ajoute les lbd de chaque clause       
+                    fprintf(file,"cg,%ld,%d,%d,%ld,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL\n",nb_clause,it_cls.second.size,it_lbd->first,*it_vec); //ajoute les lbd de chaque clause       
                 }
             }
-        fprintf(file,"\n");
         nb_clause++;
     }
-    fprintf(file, "t,%lu,%lu,%lu\n", nb_doublons, clauses.size(), reductions.size());
-    fprintf(file, "gd,%d,%d,%d\n", nb_global,nb_pair,nb_impair);
+    fprintf(file, "t,NULL,NULL,NULL,NULL,NULL,%lu,%lu,%lu,NULL,NULL,NULL,NULL,NULL,NULL\n", clauses.size(), nb_doublons, reductions.size());
+    fprintf(file, "gd,NULL,NULL,NULL,NULL,NULL,NULL,%d,NULL,%d,%d,NULL,NULL,NULL,NULL\n", nb_global,nb_pair,nb_impair);
     for (auto& it_solver: nb_clauses_by_w) {
-        fprintf(file, "w,%d,%lu,%lu\n", it_solver.first, it_solver.second, nb_doublons_self_by_w[it_solver.first]);
+        fprintf(file, "w,%d,NULL,NULL,NULL,NULL,%lu,%lu,NULL,NULL,NULL,NULL,NULL,NULL,NULL\n", it_solver.first, nb_doublons_self_by_w[it_solver.first], it_solver.second);
     }
     for (auto& it_solver: distrib_over_workers) {
-        fprintf(file, "dw,%d,%lu\n", it_solver.first, it_solver.second);
+        fprintf(file, "dw,NULL,NULL,NULL,NULL,%d,NULL,%lu,NULL,NULL,NULL,NULL,NULL,NULL,NULL\n", it_solver.second, it_solver.first);
     }
     for (auto& it_solver: distrib_nb_doublons) {
-        fprintf(file, "dd,%d,%lu\n", it_solver.first, it_solver.second);
+        fprintf(file, "dd,NULL,NULL,NULL,NULL,%d,NULL,%lu,NULL,NULL,NULL,NULL,NULL,NULL,NULL\n", it_solver.first, it_solver.second);
     }
 
     for (auto& it_lits: variables){
         for( auto& it_wkrs : it_lits.second){
-            fprintf(file, "lit,%d,%d,%lu\n",it_lits.first, it_wkrs.first, it_wkrs.second);
+            fprintf(file, "lit,%d,NULL,%d,NULL,%lu,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL\n",it_lits.first, it_wkrs.first, it_wkrs.second);
         }
     }
 
@@ -424,9 +404,9 @@ for (auto& it_cls: reductions) {
         distrib_nb_doublons_reductions[it_cls.second - 1] = 1;
     }
 }
-fprintf(file,"r,%lu,%lu,%lu,%lu,%lu,%lu\n", nb_reduction, nb_reduction_self_doublon, nb_reduction_originals, nb_reduction_doublon_avec_w, nb_reduction_doublon_avec_w_total, nb_doublons);
+fprintf(file,"r,NULL,NULL,NULL,NULL,NULL,NULL,%lu,%lu,NULL,NULL,%lu,%lu,%lu,%lu\n", nb_doublons, nb_reduction, nb_reduction_self_doublon, nb_reduction_originals, nb_reduction_doublon_avec_w, nb_reduction_doublon_avec_w_total);
 for (auto& it_solver: distrib_nb_doublons_reductions) {
-    fprintf(file, "rdd,%d,%lu\n", it_solver.first, it_solver.second);
+    fprintf(file, "rdd,NULL,NULL,NULL,NULL,NULL,NULL,%d,%lu,NULL,NULL,NULL,NULL,NULL,NULL,NULL\n",  it_solver.second,it_solver.first);
 }
 fclose(file);
 }
