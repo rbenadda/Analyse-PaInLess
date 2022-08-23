@@ -183,30 +183,22 @@ void ClauseHashTable::print_duplicate_time(unsigned int round,string end_file){
 
         if(nb_lbd > 1){
             for(auto& it_wkr : it_cls.second.lbds_per_round){ // Pour chacun des workers
-                first = true;
-                 for (auto it_vec = it_wkr.second[round].begin();it_vec != it_wkr.second[round].end();it_vec++){
-                    if (first == true){
-                        fprintf(file,"lbdot,%ld,%ld,%ld,%d,%d",round,it_cls.second.index,nb_lbd,it_cls.second.size,it_wkr.first);
-                        first = false;
-                    }
-                    fprintf(file,",%d",*it_vec);                  
-                }
-                    if( first != true){
-                        fprintf(file,"\n");
-                    }
-                }
+                for (auto it_vec = it_wkr.second[round].begin();it_vec != it_wkr.second[round].end();it_vec++){
+                        fprintf(file,"lbdot,%ld,%ld,%d,NULL,NULL,%ld,%d,%d\n",round,it_cls.second.index,it_wkr.first,nb_lbd,it_cls.second.size,*it_vec);
+                }                  
             }
-            nb_lbd = 0;
+        }
+        nb_lbd = 0;
     }
-        fprintf(file, "tot,%d,%lu,%lu\n",round, nb_doublons, clauses_time.size());
+        fprintf(file, "tot,%d,NULL,NULL%lu,%lu,NULL,NULL,NULL\n",round, nb_doublons, clauses_time.size());
     	for (auto& it_solver: nb_clauses_by_w) {
-        	fprintf(file, "wot,%d,%d,%lu,%lu\n",round, it_solver.first, it_solver.second, nb_doublons_self_by_w[it_solver.first]);
+        	fprintf(file, "wot,%d,NULL,%d,%lu,%lu,NULL,NULL,NULL\n",round, it_solver.first, nb_doublons_self_by_w[it_solver.first], it_solver.second);
 	    }
     	for (auto& it_solver: distrib_over_workers) {
-        	fprintf(file, "dwot,%d,%d,%lu\n",round, it_solver.first, it_solver.second);
+        	fprintf(file, "dwot,%d,NULL,NULL,%d,%lu,NULL,NULL,NULL\n",round, it_solver.first, it_solver.second);
     	}
     	for (auto& it_solver: distrib_nb_doublons) {
-        	fprintf(file, "ddot,%d,%d,%lu\n",round, it_solver.first, it_solver.second);
+        	fprintf(file, "ddot,%d,NULL,NULL,%d,%lu,NULL,NULL,NULL\n",round, it_solver.first, it_solver.second);
     	}
 
     fclose(file);
@@ -406,7 +398,7 @@ for (auto& it_cls: reductions) {
 }
 fprintf(file,"r,NULL,NULL,NULL,NULL,NULL,NULL,%lu,%lu,NULL,NULL,%lu,%lu,%lu,%lu\n", nb_doublons, nb_reduction, nb_reduction_self_doublon, nb_reduction_originals, nb_reduction_doublon_avec_w, nb_reduction_doublon_avec_w_total);
 for (auto& it_solver: distrib_nb_doublons_reductions) {
-    fprintf(file, "rdd,NULL,NULL,NULL,NULL,NULL,NULL,%d,%lu,NULL,NULL,NULL,NULL,NULL,NULL,NULL\n",  it_solver.second,it_solver.first);
+    fprintf(file, "rdd,NULL,NULL,NULL,NULL,NULL,NULL,%d,%lu,NULL,NULL,NULL,NULL,NULL,NULL\n",  it_solver.second,it_solver.first);
 }
 fclose(file);
 }
