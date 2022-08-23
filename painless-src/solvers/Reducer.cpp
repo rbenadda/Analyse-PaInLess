@@ -168,8 +168,8 @@ Reducer::strengthened(ClauseExchange * cls,
    }
    if (tmpNewClause.size() == 0)
       return true;
-   bool cls_seen = filter.test_and_insert(tmpNewClause);
-   return (tmpNewClause.size() < cls->size || always_share) && !cls_seen;
+   //*bool cls_seen = filter.test_and_insert(tmpNewClause);
+   return (tmpNewClause.size() < cls->size) ; //* && !cls_seen
 }
 
 void

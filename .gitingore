@@ -4,3 +4,6 @@ mapleCOMSPS/build
 mapleCOMSPS/m4ri-20140914
 painless-mcomsps
 *.o
+scripts/graph
+scripts/graphe
+scripts/out

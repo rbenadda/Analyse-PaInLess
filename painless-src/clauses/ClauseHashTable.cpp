@@ -30,15 +30,11 @@ int ClauseHashTable::store(ClauseExchange* c, int round) {
    }
     // If the clause come from a regular solver (not the Reducer),
     // increase the ref counter in 'clauses'
-    if (c->from < reducer_id) {
+    //!if (c->from < reducer_id) {
         auto it_solver = clauses[cls].workers.find(c->from);
             // Ajout du lbd de la clause
         clauses[cls].lbds[c->from].push_back(c->lbd);
-
-        clauses[cls].replica = 0;
-        for(auto& it_cpt: clauses[cls].lbds){
-            clauses[cls].replica = clauses[cls].replica + it_cpt.second.size();
-        }
+        clauses[cls].replica++;
 
         if (it_solver != clauses[cls].workers.end()) {
             clauses[cls].workers[c->from]++;
@@ -48,17 +44,35 @@ int ClauseHashTable::store(ClauseExchange* c, int round) {
             clauses[cls].workers[c->from] = 1;
         }
         
-        for(size_t i = 0; i < c->size; ++i){
-            auto it_lits = variables[c->lits[i]].find(c->from);
-            if(it_lits != variables[c->lits[i]].end()){
-                variables[c->lits[i]][c->from]++;                    
+
+        if(clauses[cls].replica > 1) // Si c'est un doublons
+            for(size_t i = 0; i < c->size; ++i){
+                auto it_lits = variables_doublons[c->lits[i]].find(c->from);
+                auto it_global = variables[c->lits[i]].find(c->from);
+
+                if(it_global != variables[c->lits[i]].end()){
+                    variables_doublons[c->lits[i]][c->from]++;
+                }
+                if(it_lits != variables_doublons[c->lits[i]].end()){
+                    variables_doublons[c->lits[i]][c->from]++;                    
+                }
+                else{
+                    variables_doublons[c->lits[i]][c->from] = 1;
+                }
+        }
+        else{ // Sinon
+            for(size_t i = 0; i < c->size; ++i){
+                auto it_lits = variables[c->lits[i]].find(c->from);
+                if(it_lits != variables[c->lits[i]].end()){
+                    variables[c->lits[i]][c->from]++;                    
+                }
+                else{
+                    variables[c->lits[i]][c->from] = 1;
             }
-            else{
-                variables[c->lits[i]][c->from] = 1;
-            }
+        }
     }
     // Else, increases the ref counter in reduction
-    } else if (c->from == reducer_id) {
+    /*!} else*/ if (c->from == reducer_id) {
         auto it_cls = reductions.find(cls);
         if (it_cls != reductions.end()) {
             reductions[cls]++;
@@ -79,7 +93,7 @@ void ClauseHashTable::store_time(ClauseExchange* c,unsigned int round){
     for (int lit : tmp) {
        cls += std::to_string(lit);
     }
-    if (c->from < reducer_id) {
+    //!if (c->from < reducer_id) {
        auto it_solver = clauses_time[cls].workers.find(c->from);
        if (it_solver != clauses_time[cls].workers.end()) {
        		clauses_time[cls].workers[c->from]++;
@@ -97,7 +111,7 @@ void ClauseHashTable::store_time(ClauseExchange* c,unsigned int round){
             clauses_lbd[cls].size = (c->size);
             index_clause++;
         }
-    }
+    //}
 }
 
 void ClauseHashTable::print_duplicate_time(unsigned int round,string end_file){
@@ -252,6 +266,7 @@ void ClauseHashTable::print_duplicate(string end_file) {
     unsigned int nb_pair = 0;
     unsigned int nb_impair = 0;
     unsigned int nb_global = 0;
+    unsigned int nb_replica = 1;
     for (auto& it_cls : clauses) {
         // tmp_nb_doublons_clause: count the number of replicas for this clause
         int tmp_nb_doublons_clause = -1;
@@ -333,22 +348,29 @@ void ClauseHashTable::print_duplicate(string end_file) {
             distrib_over_workers[nb_workers] = 1;
         }
         // PARTIE AJOUTEE
-        //size_doublons
+        nb_replica = 0;
         if(it_cls.second.lbds.size() > 1 ){
-            // clause doublons | respectivement id_worker, size et les lbds
-            //* fprintf(file,"cd,%ld,%d",nb_clause,it_cls.second.size);
             for (auto it_lbd = it_cls.second.lbds.begin(); it_lbd != it_cls.second.lbds.end(); it_lbd++){
                 for (auto it_vec = it_lbd->second.begin();it_vec != it_lbd->second.end();it_vec++){
-                    fprintf(file,"cd,%ld,%d,%d,%ld,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL\n",nb_clause,it_cls.second.size,it_lbd->first,*it_vec); // worker/lbd     
+                    nb_replica++;
+                }
+            }
+        }
+        //size_doublons
+        if(it_cls.second.lbds.size() > 1 ){
+            // clause doublons | respectivement id_worker, size et le lbd et le nombre de fois qu'elle apparait
+            for (auto it_lbd = it_cls.second.lbds.begin(); it_lbd != it_cls.second.lbds.end(); it_lbd++){
+                for (auto it_vec = it_lbd->second.begin();it_vec != it_lbd->second.end();it_vec++){
+                    fprintf(file,"cd,%ld,%d,%d,%ld,%lu,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL\n",nb_clause,it_cls.second.size,it_lbd->first,*it_vec,nb_replica); // worker/lbd     
                 }
             }
             nb_clause++;
         }
-    // Pour toutes les clauses 
-        //* fprintf(file,"cg,%ld,%d",nb_clause,it_cls.second.size); // clauses globales
+        nb_replica = 1;
+        // Pour toutes les clauses 
         for (auto it_lbd = it_cls.second.lbds.begin(); it_lbd != it_cls.second.lbds.end(); it_lbd++){
                 for (auto it_vec = it_lbd->second.begin();it_vec != it_lbd->second.end();it_vec++){
-                    fprintf(file,"cg,%ld,%d,%d,%ld,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL\n",nb_clause,it_cls.second.size,it_lbd->first,*it_vec); //ajoute les lbd de chaque clause       
+                    fprintf(file,"cg,%ld,%d,%d,%ld,%ld,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL\n",nb_clause,it_cls.second.size,it_lbd->first,*it_vec,nb_replica); //ajoute les lbd de chaque clause       
                 }
             }
         nb_clause++;
@@ -367,7 +389,13 @@ void ClauseHashTable::print_duplicate(string end_file) {
 
     for (auto& it_lits: variables){
         for( auto& it_wkrs : it_lits.second){
-            fprintf(file, "lit,%d,NULL,%d,NULL,%lu,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL\n",it_lits.first, it_wkrs.first, it_wkrs.second);
+            fprintf(file, "glit,%d,NULL,%d,NULL,%lu,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL\n",it_lits.first, it_wkrs.first, it_wkrs.second);
+        }
+    }
+
+    for (auto& it_lits: variables_doublons){
+        for( auto& it_wkrs : it_lits.second){
+            fprintf(file, "dlit,%d,NULL,%d,NULL,%lu,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL\n",it_lits.first, it_wkrs.first, it_wkrs.second);
         }
     }
 
