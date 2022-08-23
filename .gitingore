@@ -1,4 +1,8 @@
-data/
+data/dimacs_sample
+data/logs
+data/logs_reducer
+data/test
+data/old_graphe.py
 logs/
 mapleCOMSPS/build
 mapleCOMSPS/m4ri-20140914
